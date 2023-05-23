@@ -106,9 +106,44 @@ const signupUser = async (req, res) => {
  */
 
  const logout = (req, res) => {
+    
+    try {
     const token = req.body.token;
 
-    //Write your code here.
+    if (!token) {
+        return res.status(401).json({
+          status: 'fail',
+          message: 'Authentication failed: Missing token.',
+        });
+      }
+  
+      // Verify the token
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(500).json({
+            status: 'fail',
+            message: 'Something went wrong',
+            error: err.message,
+          });
+        }
+  
+        // Clear the cookie
+        res.clearCookie('token');
+  
+        res.status(200).json({
+          status: 'success',
+          message: 'Logged out successfully.',
+        });
+      });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+          status: 'fail',
+          message: 'Something went wrong',
+          error: error.message,
+        });
+      }
+
 };
 
 module.exports = { loginUser , signupUser, logout };

@@ -137,6 +137,39 @@ the latest data will be at the top.
 const getallTask = async (req, res) => {
 
     //Write your code here.
+    try {
+        const { token } = req.body;
+    
+        // Check if the user is an admin
+        const isAdmin = checkAdminStatus(token); // Replace this with your own logic to check admin status
+    
+        let query = {};
+    
+        // If status filter is provided, add it to the query
+        if (req.query.status) {
+          query.status = req.query.status;
+        }
+    
+        // If the user is not an admin, add user filter to the query
+        if (!isAdmin) {
+          query.user = token.userId;
+        }
+    
+        // Find all tasks based on the query
+        const tasks = await Task.find(query).sort({ createdAt: -1 });
+    
+        res.status(200).json({
+          status: 'success',
+          data: tasks,
+        });
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({
+          status: 'fail',
+          message: 'Something went wrong',
+          error: error.message,
+        });
+      }
 }
 
 
